@@ -37,6 +37,34 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Lyric Display Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/lyric_card"
+            style="@style/ModernCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/lyric_tv"
+                    style="@style/MediumText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="正在加载歌词..."
+                    android:textColor="@color/primary"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <TextView
             style="@style/MediumText"
             android:layout_width="wrap_content"

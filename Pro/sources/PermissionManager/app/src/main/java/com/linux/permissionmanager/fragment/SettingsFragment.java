@@ -37,6 +37,7 @@ import com.linux.permissionmanager.model.AppUpdateInfo;
 import com.linux.permissionmanager.update.AppUpdateManager;
 import com.linux.permissionmanager.utils.DialogUtils;
 import com.linux.permissionmanager.utils.UrlIntentUtils;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 public class SettingsFragment extends Fragment {
     private Activity mActivity;
@@ -56,11 +57,16 @@ public class SettingsFragment extends Fragment {
     private TextView mTvBgMusicStatus;
     private Button mBtnPickBgMusic;
     private Button mBtnClearBgMusic;
+    private MaterialSwitch mSwitchShowLyrics;
+    private TextView mTvLyricFileStatus;
+    private Button mBtnPickLyricFile;
+    private Button mBtnClearLyricFile;
     private TextView mTvLogSavePath;
     private Button mBtnPickLogPath;
     private Button mBtnClearLogPath;
     private com.google.android.material.slider.Slider mCardAlphaSlider;
     private TextView mTvCardAlphaValue;
+    private LinearLayout mThemeColorsContainer;
 
     // Update component
     private LinearLayout mTvUpdateBlock;
@@ -97,11 +103,16 @@ public class SettingsFragment extends Fragment {
         mTvBgMusicStatus = view.findViewById(R.id.bg_music_status_tv);
         mBtnPickBgMusic = view.findViewById(R.id.pick_bg_music_btn);
         mBtnClearBgMusic = view.findViewById(R.id.clear_bg_music_btn);
+        mSwitchShowLyrics = view.findViewById(R.id.show_lyrics_switch);
+        mTvLyricFileStatus = view.findViewById(R.id.lyric_file_status_tv);
+        mBtnPickLyricFile = view.findViewById(R.id.pick_lyric_file_btn);
+        mBtnClearLyricFile = view.findViewById(R.id.clear_lyric_file_btn);
         mTvLogSavePath = view.findViewById(R.id.log_save_path_tv);
         mBtnPickLogPath = view.findViewById(R.id.pick_log_path_btn);
         mBtnClearLogPath = view.findViewById(R.id.clear_log_path_btn);
         mCardAlphaSlider = view.findViewById(R.id.card_alpha_slider);
         mTvCardAlphaValue = view.findViewById(R.id.card_alpha_value_tv);
+        mThemeColorsContainer = view.findViewById(R.id.theme_colors_container);
 
         // Update component
         mTvUpdateBlock = view.findViewById(R.id.core_update_block);
@@ -152,6 +163,18 @@ public class SettingsFragment extends Fragment {
         });
         updateBgMusicStatus();
 
+        mSwitchShowLyrics.setChecked(AppSettings.getBoolean("show_lyrics", false));
+        mSwitchShowLyrics.setOnCheckedChangeListener((v, isChecked) -> {
+            AppSettings.setBoolean("show_lyrics", isChecked);
+        });
+
+        mBtnPickLyricFile.setOnClickListener(v -> pickLyricFile());
+        mBtnClearLyricFile.setOnClickListener(v -> {
+            AppSettings.setString("lyric_file_uri", "");
+            updateLyricFileStatus();
+        });
+        updateLyricFileStatus();
+
         mBtnPickLogPath.setOnClickListener(v -> pickLogPath());
         mBtnClearLogPath.setOnClickListener(v -> {
             AppSettings.setString("log_save_path", "");
@@ -168,10 +191,71 @@ public class SettingsFragment extends Fragment {
             updateAllCardsAlpha(getView());
         });
 
+        initThemeColorPicker();
+
         mUpdateManager = new AppUpdateManager(mActivity);
         initAboutText();
         initLink();
         initUpdateBlock();
+    }
+
+    private void initThemeColorPicker() {
+        int[] colors = {
+            Color.parseColor("#6750A4"), // Default Purple
+            Color.parseColor("#2196F3"), // Blue
+            Color.parseColor("#009688"), // Teal
+            Color.parseColor("#4CAF50"), // Green
+            Color.parseColor("#FFC107"), // Amber
+            Color.parseColor("#FF9800"), // Orange
+            Color.parseColor("#F44336"), // Red
+            Color.parseColor("#E91E63"), // Pink
+            Color.parseColor("#607D8B"), // Blue Grey
+            Color.parseColor("#3F51B5")  // Indigo
+        };
+
+        mThemeColorsContainer.removeAllViews();
+        int currentColor = ThemeUtils.getThemeColor();
+        int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources().getDisplayMetrics());
+        int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+
+        for (int color : colors) {
+            View colorView = new View(mActivity);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
+            params.setMargins(margin, margin, margin, margin);
+            colorView.setLayoutParams(params);
+            
+            // Create a circular background with the color
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setColor(color);
+            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            
+            // Add a border if it's the current color
+            if (color == currentColor) {
+                gd.setStroke((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics()), 
+                             Color.LTGRAY);
+            }
+            
+            colorView.setBackground(gd);
+            colorView.setElevation(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
+            
+            colorView.setOnClickListener(v -> {
+                ThemeUtils.setThemeColor(color);
+                initThemeColorPicker(); // Refresh to show selection
+                if (mActivity instanceof MainActivity) {
+                    ThemeUtils.applyTheme(mActivity);
+                    // Also need to refresh fragments
+                    refreshAllFragmentsTheme();
+                }
+            });
+            
+            mThemeColorsContainer.addView(colorView);
+        }
+    }
+
+    private void refreshAllFragmentsTheme() {
+        // This is a bit tricky, but since ThemeUtils.applyToViewTree works on any view
+        // we can just apply it to the root view of the current fragment
+        ThemeUtils.applyToViewTree(getView(), ThemeUtils.getThemeColor());
     }
 
     private void showSelectTestSkrootBasicsDlg() {
@@ -264,6 +348,13 @@ public class SettingsFragment extends Fragment {
         startActivityForResult(intent, ActivityResultId.REQUEST_CODE_CHOOSE_BG_MUSIC);
     }
 
+    private void pickLyricFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, ActivityResultId.REQUEST_CODE_CHOOSE_LYRIC_FILE);
+    }
+
     private void updateBgMusicStatus() {
         String uriStr = AppSettings.getString("background_music_uri", "");
         if (uriStr.isEmpty()) {
@@ -283,6 +374,29 @@ public class SettingsFragment extends Fragment {
                 }
             } catch (Exception e) {
                 mTvBgMusicStatus.setText("已设置 (无法解析名称)");
+            }
+        }
+    }
+
+    private void updateLyricFileStatus() {
+        String uriStr = AppSettings.getString("lyric_file_uri", "");
+        if (uriStr.isEmpty()) {
+            mTvLyricFileStatus.setText("未选择");
+        } else {
+            try {
+                Uri uri = Uri.parse(uriStr);
+                String path = uri.getPath();
+                if (path != null) {
+                    int index = path.lastIndexOf('/');
+                    if (index >= 0) {
+                        path = path.substring(index + 1);
+                    }
+                    mTvLyricFileStatus.setText("已选择: " + Uri.decode(path));
+                } else {
+                    mTvLyricFileStatus.setText("已选择");
+                }
+            } catch (Exception e) {
+                mTvLyricFileStatus.setText("已选择 (无法解析名称)");
             }
         }
     }
@@ -309,32 +423,39 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ActivityResultId.REQUEST_CODE_CHOOSE_BG_MUSIC && resultCode == Activity.RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    // Take persistable permission
-                    mActivity.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                AppSettings.setString("background_music_uri", uri.toString());
-                updateBgMusicStatus();
-                com.linux.permissionmanager.utils.BackgroundMusicManager.getInstance(mActivity).play(uri);
+        if (resultCode != Activity.RESULT_OK || data == null) return;
+
+        Uri uri = data.getData();
+        if (uri == null) return;
+
+        if (requestCode == ActivityResultId.REQUEST_CODE_CHOOSE_BG_MUSIC) {
+            try {
+                // Take persistable permission
+                mActivity.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } else if (requestCode == ActivityResultId.REQUEST_CODE_CHOOSE_LOG_PATH && resultCode == Activity.RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    // Take persistable permission for the directory
-                    mActivity.getContentResolver().takePersistableUriPermission(uri, 
+            AppSettings.setString("background_music_uri", uri.toString());
+            updateBgMusicStatus();
+            com.linux.permissionmanager.utils.BackgroundMusicManager.getInstance(mActivity).play(uri);
+        } else if (requestCode == ActivityResultId.REQUEST_CODE_CHOOSE_LOG_PATH) {
+            try {
+                // Take persistable permission for the directory
+                mActivity.getContentResolver().takePersistableUriPermission(uri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    
-                    AppSettings.setString("log_save_path", uri.toString());
-                    updateLogPathStatus();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+                AppSettings.setString("log_save_path", uri.toString());
+                updateLogPathStatus();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (requestCode == ActivityResultId.REQUEST_CODE_CHOOSE_LYRIC_FILE) {
+            try {
+                mActivity.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                AppSettings.setString("lyric_file_uri", uri.toString());
+                updateLyricFileStatus();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

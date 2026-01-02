@@ -5,4 +5,5 @@ public class ActivityResultId {
     public static final int REQUEST_CODE_CHOOSE_BG_IMAGE = 1002;
     public static final int REQUEST_CODE_CHOOSE_BG_MUSIC = 1003;
     public static final int REQUEST_CODE_CHOOSE_LOG_PATH = 1004;
+    public static final int REQUEST_CODE_CHOOSE_LYRIC_FILE = 1005;
 }

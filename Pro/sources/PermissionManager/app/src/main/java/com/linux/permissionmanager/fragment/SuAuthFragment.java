@@ -28,6 +28,7 @@ import com.linux.permissionmanager.helper.SelectAppDlg;
 import com.linux.permissionmanager.model.SelectAppItem;
 import com.linux.permissionmanager.model.SuAuthItem;
 import com.linux.permissionmanager.utils.DialogUtils;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -58,6 +59,7 @@ public class SuAuthFragment extends Fragment {
         mEmptyLayout = view.findViewById(R.id.empty_layout);
         mSuAuthRecyclerView = view.findViewById(R.id.su_auth_recycler_view);
         setupSuAuthRecyclerView();
+        ThemeUtils.applyToViewTree(view, ThemeUtils.getThemeColor());
     }
 
     public void setRootKey(String rootKey) {

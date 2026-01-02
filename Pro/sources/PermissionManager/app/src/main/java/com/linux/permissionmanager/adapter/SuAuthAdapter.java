@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.linux.permissionmanager.R;
 import com.linux.permissionmanager.model.SuAuthItem;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 import java.util.List;
 
@@ -47,6 +48,8 @@ public class SuAuthAdapter extends RecyclerView.Adapter<SuAuthAdapter.ViewHolder
                 listener.onRemoveSuAuthBtnClick(v, suAuth);
             }
         });
+        
+        ThemeUtils.applyToViewTree(holder.itemView, ThemeUtils.getThemeColor());
     }
 
     @Override

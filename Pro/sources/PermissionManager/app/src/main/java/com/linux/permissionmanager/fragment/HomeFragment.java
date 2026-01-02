@@ -22,6 +22,13 @@ import com.linux.permissionmanager.R;
 import com.linux.permissionmanager.bridge.NativeBridge;
 import com.linux.permissionmanager.utils.ClipboardUtils;
 import com.linux.permissionmanager.utils.DialogUtils;
+import com.linux.permissionmanager.utils.ThemeUtils;
+
+import com.linux.permissionmanager.utils.BackgroundMusicManager;
+import com.linux.permissionmanager.utils.LyricUtils;
+import android.net.Uri;
+import android.widget.TextView;
+import java.util.List;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
     private Activity mActivity;
@@ -30,6 +37,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private String lastInputRootExecPath = "";
 
     private EditText console_edit;
+    private View mLyricCard;
+    private TextView mLyricTv;
+    private List<LyricUtils.LyricEntry> mLyrics;
+    private String mCurrentLyricUriStr = "";
+    
+    private final Handler mLyricUpdateHandler = new Handler();
+    private final Runnable mLyricUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateLyrics();
+            mLyricUpdateHandler.postDelayed(this, 500);
+        }
+    };
 
     public HomeFragment(Activity activity) {
         mActivity = activity;
@@ -58,6 +78,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Button copy_info_btn = view.findViewById(R.id.copy_info_btn);
         Button clean_info_btn = view.findViewById(R.id.clean_info_btn);
         console_edit = view.findViewById(R.id.console_edit);
+        mLyricCard = view.findViewById(R.id.lyric_card);
+        mLyricTv = view.findViewById(R.id.lyric_tv);
 
         install_skroot_env_btn.setOnClickListener(this);
         uninstall_skroot_env_btn.setOnClickListener(this);
@@ -67,11 +89,67 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         implant_app_btn.setOnClickListener(this);
         copy_info_btn.setOnClickListener(this);
         clean_info_btn.setOnClickListener(this);
+
+        ThemeUtils.applyToViewTree(view, ThemeUtils.getThemeColor());
     }
 
     public void setRootKey(String rootKey) {
         mRootKey = rootKey;
         showSkrootStatus();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mLyricUpdateHandler.post(mLyricUpdateRunnable);
+        updateAllCardsAlpha(getView());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mLyricUpdateHandler.removeCallbacks(mLyricUpdateRunnable);
+    }
+
+    private void updateLyrics() {
+        boolean showLyrics = AppSettings.getBoolean("show_lyrics", false);
+        String lyricUriStr = AppSettings.getString("lyric_file_uri", "");
+
+        if (!showLyrics || lyricUriStr.isEmpty()) {
+            mLyricCard.setVisibility(View.GONE);
+            return;
+        }
+
+        mLyricCard.setVisibility(View.VISIBLE);
+
+        // Load lyrics if URI changed or not loaded
+        if (!lyricUriStr.equals(mCurrentLyricUriStr) || mLyrics == null) {
+            mCurrentLyricUriStr = lyricUriStr;
+            try {
+                mLyrics = LyricUtils.parseLrc(mActivity, Uri.parse(lyricUriStr));
+                if (mLyrics.isEmpty()) {
+                    mLyricTv.setText("歌词解析为空或文件错误");
+                }
+            } catch (Exception e) {
+                mLyricTv.setText("歌词加载失败");
+                mLyrics = null;
+            }
+        }
+
+        if (mLyrics != null && !mLyrics.isEmpty()) {
+            BackgroundMusicManager musicManager = BackgroundMusicManager.getInstance(mActivity);
+            if (musicManager.isPlaying()) {
+                long currentPos = musicManager.getCurrentPosition();
+                String currentLyric = LyricUtils.getCurrentLyric(mLyrics, currentPos);
+                if (currentLyric.isEmpty()) {
+                    mLyricTv.setText("...");
+                } else {
+                    mLyricTv.setText(currentLyric);
+                }
+            } else {
+                mLyricTv.setText("音乐已暂停");
+            }
+        }
     }
 
     @Override
@@ -226,11 +304,5 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 updateAllCardsAlpha(child);
             }
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateAllCardsAlpha(getView());
     }
 }

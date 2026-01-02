@@ -15,6 +15,7 @@ import com.linux.permissionmanager.R;
 import com.linux.permissionmanager.bridge.NativeBridge;
 import com.linux.permissionmanager.model.SkrModItem;
 import com.linux.permissionmanager.model.SkrModUpdateInfo;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 import java.util.List;
 
@@ -71,6 +72,8 @@ public class SkrModAdapter extends RecyclerView.Adapter<SkrModAdapter.ViewHolder
                 listener.onNewVersionBtnClick(v, skrmod);
             }
         });
+
+        ThemeUtils.applyToViewTree(holder.itemView, ThemeUtils.getThemeColor());
     }
 
     public void updateModuleUpdateInfo(String uuid, SkrModUpdateInfo updateInfo) {

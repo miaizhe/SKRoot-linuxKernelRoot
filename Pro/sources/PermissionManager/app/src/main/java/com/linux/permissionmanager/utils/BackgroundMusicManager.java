@@ -99,6 +99,17 @@ public class BackgroundMusicManager {
     public boolean isPlaying() {
         return mediaPlayer != null && mediaPlayer.isPlaying();
     }
+
+    public int getCurrentPosition() {
+        if (mediaPlayer != null) {
+            try {
+                return mediaPlayer.getCurrentPosition();
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
     
     public Uri getCurrentUri() {
         return currentUri;

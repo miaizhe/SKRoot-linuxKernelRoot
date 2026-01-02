@@ -31,6 +31,7 @@ import com.linux.permissionmanager.utils.GetAppListPermissionHelper;
 import com.linux.permissionmanager.utils.GetSdcardPermissionsHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.linux.permissionmanager.utils.BackgroundMusicManager;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 public class MainActivity extends AppCompatActivity {
     private String mRootKey = "";
@@ -80,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
         checkGetAppListPermission();
         showInputRootKeyDlg();
         setupFragment();
+
+        // Apply theme color
+        ThemeUtils.applyTheme(this);
 
         // Auto play background music
         String bgMusicUriStr = AppSettings.getString("background_music_uri", "");
@@ -218,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.fragment_enter, R.anim.fragment_exit)
                         .replace(R.id.frame_layout, selectedFragment)
                         .commitNow();
                 return true;

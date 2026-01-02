@@ -32,6 +32,7 @@ import com.linux.permissionmanager.update.SkrModUpdateManager;
 import com.linux.permissionmanager.utils.DialogUtils;
 import com.linux.permissionmanager.utils.DownloadDialogHelper;
 import com.linux.permissionmanager.utils.FileUtils;
+import com.linux.permissionmanager.utils.ThemeUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -72,6 +73,7 @@ public class SkrModFragment extends Fragment {
         mSkrModRecyclerView = view.findViewById(R.id.skr_mod_recycler_view);
         mUpdateManager = new SkrModUpdateManager(mActivity);
         setupSkrModRecyclerView();
+        ThemeUtils.applyToViewTree(view, ThemeUtils.getThemeColor());
     }
 
     public void setRootKey(String rootKey) {
