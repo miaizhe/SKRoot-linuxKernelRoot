@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <View
+            android:id="@+id/color_preview"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@android:color/black"
+            android:elevation="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="预览颜色"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/color_hex_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="#6750A4"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:inputType="textCapCharacters"
+                    android:singleLine="true"
+                    android:textSize="14sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="红色 (R)"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary" />
+    <SeekBar
+        android:id="@+id/seekbar_r"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绿色 (G)"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary" />
+    <SeekBar
+        android:id="@+id/seekbar_g"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="蓝色 (B)"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary" />
+    <SeekBar
+        android:id="@+id/seekbar_b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp" />
+
+</LinearLayout>

@@ -13,12 +13,16 @@ import android.os.Message;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.UnderlineSpan;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -255,16 +259,119 @@ public class SettingsFragment extends Fragment {
             
             colorView.setOnClickListener(v -> {
                 ThemeUtils.setThemeColor(color);
-                initThemeColorPicker(); // Refresh to show selection
-                if (mActivity instanceof MainActivity) {
-                    ThemeUtils.applyTheme(mActivity);
-                    // Also need to refresh fragments
-                    refreshAllFragmentsTheme();
-                }
+                applyNewTheme(color);
             });
             
             mThemeColorsContainer.addView(colorView);
         }
+
+        // Add custom color picker button
+        View customColorView = new View(mActivity);
+        LinearLayout.LayoutParams customParams = new LinearLayout.LayoutParams(size, size);
+        customParams.setMargins(margin, margin, margin, margin);
+        customColorView.setLayoutParams(customParams);
+
+        android.graphics.drawable.GradientDrawable customGd = new android.graphics.drawable.GradientDrawable();
+        customGd.setColor(Color.TRANSPARENT);
+        customGd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        customGd.setStroke((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()), Color.GRAY);
+        
+        // Use a "+" icon or similar for custom color
+         customColorView.setBackground(customGd);
+         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+             customColorView.setForeground(getResources().getDrawable(R.drawable.ic_add_white, null));
+         }
+        
+        customColorView.setOnClickListener(v -> showCustomColorPickerDialog());
+        mThemeColorsContainer.addView(customColorView);
+    }
+
+    private void applyNewTheme(int color) {
+        initThemeColorPicker(); // Refresh to show selection
+        if (mActivity instanceof MainActivity) {
+            ThemeUtils.applyTheme(mActivity);
+            // Also need to refresh fragments
+            refreshAllFragmentsTheme();
+        }
+    }
+
+    private void showCustomColorPickerDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        builder.setTitle("自定义主题色");
+        
+        View view = LayoutInflater.from(mActivity).inflate(R.layout.dialog_custom_color, null);
+        EditText colorInput = view.findViewById(R.id.color_hex_input);
+        View colorPreview = view.findViewById(R.id.color_preview);
+        SeekBar seekBarR = view.findViewById(R.id.seekbar_r);
+        SeekBar seekBarG = view.findViewById(R.id.seekbar_g);
+        SeekBar seekBarB = view.findViewById(R.id.seekbar_b);
+        
+        int currentColor = ThemeUtils.getThemeColor();
+        colorPreview.setBackgroundColor(currentColor);
+        colorInput.setText(String.format("#%06X", (0xFFFFFF & currentColor)));
+        
+        seekBarR.setProgress(Color.red(currentColor));
+        seekBarG.setProgress(Color.green(currentColor));
+        seekBarB.setProgress(Color.blue(currentColor));
+        
+        final boolean[] isUpdating = {false};
+        
+        SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    isUpdating[0] = true;
+                    int r = seekBarR.getProgress();
+                    int g = seekBarG.getProgress();
+                    int b = seekBarB.getProgress();
+                    int newColor = Color.rgb(r, g, b);
+                    colorPreview.setBackgroundColor(newColor);
+                    colorInput.setText(String.format("#%06X", (0xFFFFFF & newColor)));
+                    isUpdating[0] = false;
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+        
+        seekBarR.setOnSeekBarChangeListener(seekBarListener);
+        seekBarG.setOnSeekBarChangeListener(seekBarListener);
+        seekBarB.setOnSeekBarChangeListener(seekBarListener);
+        
+        colorInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!isUpdating[0]) {
+                    try {
+                        int color = Color.parseColor(s.toString());
+                        isUpdating[0] = true;
+                        colorPreview.setBackgroundColor(color);
+                        seekBarR.setProgress(Color.red(color));
+                        seekBarG.setProgress(Color.green(color));
+                        seekBarB.setProgress(Color.blue(color));
+                        isUpdating[0] = false;
+                    } catch (Exception ignored) {}
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        
+        builder.setView(view);
+        builder.setPositiveButton("应用", (dialog, which) -> {
+            String hex = colorInput.getText().toString();
+            try {
+                int color = Color.parseColor(hex);
+                ThemeUtils.setThemeColor(color);
+                applyNewTheme(color);
+            } catch (Exception e) {
+                DialogUtils.showMsgDlg(mActivity, "错误", "无效的颜色格式", null);
+            }
+        });
+        builder.setNegativeButton("取消", null);
+        builder.show();
     }
 
     private void refreshAllFragmentsTheme() {

@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         int checkedId = mBottomNavigation.getSelectedItemId();
         
         if (mMainMenu != null) {
-            mMainMenu.setVisible(checkedId == R.id.rb_su_auth || checkedId == R.id.rb_skr_mod);
+            mMainMenu.setVisible(false);
         }
 
         if (mRefreshBgMenu != null) {
@@ -334,11 +334,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void showMainPopupMenu(View v) {
         int checkedId = mBottomNavigation.getSelectedItemId();
-        if(checkedId == R.id.rb_su_auth) showSuAuthMainPopupMenu(v);
-        if(checkedId == R.id.rb_skr_mod)  showSkrModMainPopupMenu(v);
+        if(checkedId == R.id.rb_su_auth) onShowSuAuthMainPopupMenu(v);
+        if(checkedId == R.id.rb_skr_mod)  onShowSkrModMainPopupMenu(v);
     }
 
-    private void showSuAuthMainPopupMenu(View v) {
+    public void onShowSuAuthMainPopupMenu(View v) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.getMenuInflater().inflate(R.menu.popup_su_auth_main_menu, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {
@@ -354,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
         popupMenu.show();
     }
 
-    private void showSkrModMainPopupMenu(View v) {
+    public void onShowSkrModMainPopupMenu(View v) {
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.getMenuInflater().inflate(R.menu.popup_skr_mod_main_menu, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {

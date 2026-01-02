@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.linux.permissionmanager.MainActivity;
 import com.linux.permissionmanager.R;
 import com.linux.permissionmanager.AppSettings;
 import com.linux.permissionmanager.adapter.SkrModAdapter;
@@ -72,6 +74,16 @@ public class SkrModFragment extends Fragment {
         mEmptyLayout = view.findViewById(R.id.empty_layout);
         mSkrModRecyclerView = view.findViewById(R.id.skr_mod_recycler_view);
         mUpdateManager = new SkrModUpdateManager(mActivity);
+        
+        FloatingActionButton fab = view.findViewById(R.id.fab_add_skr_mod);
+        if (fab != null) {
+            fab.setOnClickListener(v -> {
+                if (mActivity instanceof MainActivity) {
+                    ((MainActivity) mActivity).onShowSkrModMainPopupMenu(v);
+                }
+            });
+        }
+        
         setupSkrModRecyclerView();
         ThemeUtils.applyToViewTree(view, ThemeUtils.getThemeColor());
     }

@@ -43,8 +43,19 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:alpha="0.5"
-            android:text="点击右上角按钮添加" />
+            android:text="点击右下角按钮添加" />
 
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_su_auth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_white"
+        app:tint="@android:color/white"
+        app:backgroundTint="?attr/colorPrimary"
+        app:elevation="6dp" />
 
 </FrameLayout>

@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.linux.permissionmanager.MainActivity;
 import com.linux.permissionmanager.R;
 import com.linux.permissionmanager.AppSettings;
 import com.linux.permissionmanager.adapter.SuAuthAdapter;
@@ -58,6 +60,22 @@ public class SuAuthFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mEmptyLayout = view.findViewById(R.id.empty_layout);
         mSuAuthRecyclerView = view.findViewById(R.id.su_auth_recycler_view);
+        
+        FloatingActionButton fab = view.findViewById(R.id.fab_add_su_auth);
+        if (fab != null) {
+            fab.setOnClickListener(v -> {
+                if (mActivity instanceof MainActivity) {
+                    ((MainActivity) mActivity).onShowSuAuthMainPopupMenu(v);
+                } else {
+                    onShowSelectAddSuAuthList();
+                }
+            });
+            fab.setOnLongClickListener(v -> {
+                onClearSuAuth();
+                return true;
+            });
+        }
+        
         setupSuAuthRecyclerView();
         ThemeUtils.applyToViewTree(view, ThemeUtils.getThemeColor());
     }
